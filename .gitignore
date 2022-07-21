@@ -1,3 +1,10 @@
 .idea/
-references/
+
+# Environments
 env/
+
+# Local folders
+references/
+
+# Django
+__pycache__/

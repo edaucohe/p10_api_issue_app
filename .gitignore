@@ -1,10 +1,11 @@
+# PyCharm
 .idea/
 
 # Environments
 env/
 
-# Local folders
-references/
-
 # Django
 __pycache__/
+
+# Local folders
+references/

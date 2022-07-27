@@ -9,49 +9,53 @@
 
 ## Description <a class="anchor" id="description"></a>
 
-"Project 10 - API issues app" est un programme à réaliser dans le cadre de la formation diplômante d'OpenClassrooms "Développeur d'application Python".
+"Project 10 - API issues app" is a project of OpenClassrooms "Python Application Developer" course leading to a qualification.
 
-Ce projet a comme but de mettre en place une application...
+This project aims to implement an API for an "Issue tracking system" implemented using Django REST Framework.
 
 
 ## Installation <a class="anchor" id="installation"></a>
-    
-Python version : 3.9
 
-Pour récupérer le projet, lancez :
+Python version : 3.9.4
+
+To get project, launch :
 ```
 git clone https://github.com/edaucohe/p10_api_issues_app.git
 ```
 
-Pour créer l'environnement virtuel, placez-vous dans le dossier `../projet9` et tapez :
+To create virtual environment, go into the folder `../p10_api_issues_app` and launch :
 ```
 python -m venv env  
 ```
 
-Pour activer l'environnement virtuel, tapez :
+To activate virtual environment, launch :
 
-- Sur windows
+- In windows
 ```
 source env/Scripts/activate
 ```
-- Sur Mac/Linux
+- In Linux
 ```
 source env/bin/activate
 ```
 
-Pour installer les dépendances du fichier `requirements.txt`, lancez :
+To install file dependencies `requirements.txt`, launch :
 ```
 pip install -r requirements.txt
 ```
 
 ## Setup <a class="anchor" id="setup"></a>
 
-A remplir
+To fill
 
 ## Use <a class="anchor" id="use"></a>
 
-A remplir
+To fill
 
 ## Helpful links <a class="anchor" id="links"></a>
 
+DRF installation and settings:
+https://www.django-rest-framework.org/
 
+JWT installation and settings:
+https://django-rest-framework-simplejwt.readthedocs.io/en/latest/getting_started.html

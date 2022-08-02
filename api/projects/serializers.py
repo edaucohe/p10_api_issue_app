@@ -10,3 +10,11 @@ class ProjectSerializer(ModelSerializer):
 
     def create(self, validated_data):
         return Project.objects.create(**validated_data)
+
+    def update(self, instance, validated_data):
+        instance.title = validated_data.get('title', instance.title)
+        instance.description = validated_data.get('description', instance.description)
+        instance.type = validated_data.get('type', instance.type)
+        instance.author = self.context['author']
+        instance.save()
+        return instance

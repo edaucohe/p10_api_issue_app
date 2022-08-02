@@ -1,4 +1,4 @@
-from django.shortcuts import render
+# from django.shortcuts import render
 from rest_framework import status
 # from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
@@ -14,7 +14,7 @@ class ProjectViewSet(ModelViewSet):
     serializer_class = ProjectSerializer
     permission_classes = (IsAuthenticated,)
     # authentication_classes = (TokenAuthentication,)
-    http_method_names = ['get', 'post']
+    http_method_names = ['get', 'post', 'put']
 
     def get_queryset(self):
         # Afficher la liste des projets rattachés à l'utilisateur
@@ -38,5 +38,24 @@ class ProjectViewSet(ModelViewSet):
 
     def retrieve(self, request, pk=None):
         instance = self.get_object()
-        # query = request.GET.get('query', None)  # read extra data
         return Response(self.serializer_class(instance).data, status=status.HTTP_200_OK)
+
+    def update(self, request, pk=None, *args, **kwargs):
+        user = request.user
+        instance = self.get_object()
+        data = {
+            "title": request.POST.get('title', None),
+            "description": request.POST.get('description', None),
+            "type": request.POST.get('type', None),
+            }
+        serializer = self.serializer_class(
+            instance=instance,
+            data=data,
+            context={'author': user},
+            partial=True
+        )
+        if serializer.is_valid():
+            serializer.save()
+            return Response(data=serializer.data, status=status.HTTP_201_CREATED)
+        else:
+            return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)

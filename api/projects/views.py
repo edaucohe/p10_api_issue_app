@@ -14,7 +14,7 @@ class ProjectViewSet(ModelViewSet):
     serializer_class = ProjectSerializer
     permission_classes = (IsAuthenticated,)
     # authentication_classes = (TokenAuthentication,)
-    http_method_names = ['get', 'post', 'put']
+    http_method_names = ['get', 'post', 'put', 'delete']
 
     def get_queryset(self):
         # Afficher la liste des projets rattachés à l'utilisateur
@@ -59,3 +59,8 @@ class ProjectViewSet(ModelViewSet):
             return Response(data=serializer.data, status=status.HTTP_201_CREATED)
         else:
             return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def destroy(self, request, pk=None, *args, **kwargs):
+        instance = self.get_object()
+        # you custom logic #
+        return super(ProjectViewSet, self).destroy(request, pk, *args, **kwargs)

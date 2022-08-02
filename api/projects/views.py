@@ -21,17 +21,20 @@ class ProjectViewSet(ModelViewSet):
         queryset = Project.objects.filter(author_user=self.request.user)
         return queryset
 
-    # def create(self, request, *args, **kwargs):
-    #     user = request.user
-    #     data = {
-    #         "title": request.POST.get('title', None),
-    #         }
-    #     serializer = self.serializer_class(data=data, context={'author': user})
-    #     if serializer.is_valid():
-    #         serializer.save()
-    #         return Response(data=serializer.data, status=status.HTTP_201_CREATED)
-    #     else:
-    #         return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    def create(self, request, *args, **kwargs):
+        user = request.user
+        data = {
+            "title": request.POST.get('title', None),
+            "description": request.POST.get('description', None),
+            "type": request.POST.get('type', None),
+            "author_user": user.pk,
+            }
+        serializer = self.serializer_class(data=data, context={'author': user})
+        if serializer.is_valid():
+            serializer.save()
+            return Response(data=serializer.data, status=status.HTTP_201_CREATED)
+        else:
+            return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     # def perform_create(self, serializer):
     #     serializer.save(author_user=self.request.user)

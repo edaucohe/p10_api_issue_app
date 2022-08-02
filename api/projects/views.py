@@ -36,10 +36,7 @@ class ProjectViewSet(ModelViewSet):
         else:
             return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    # def perform_create(self, serializer):
-    #     serializer.save(author_user=self.request.user)
-
-    # def retrieve(self, request, pk=None):
-    #     instance = self.get_object()
-    #     # query = request.GET.get('query', None)  # read extra data
-    #     return Response(self.serializer_class(instance).data, status=status.HTTP_200_OK)
+    def retrieve(self, request, pk=None):
+        instance = self.get_object()
+        # query = request.GET.get('query', None)  # read extra data
+        return Response(self.serializer_class(instance).data, status=status.HTTP_200_OK)

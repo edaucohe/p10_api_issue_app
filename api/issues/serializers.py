@@ -7,3 +7,6 @@ class IssueSerializer(ModelSerializer):
     class Meta:
         model = Issue
         fields = '__all__'
+
+    def create(self, validated_data):
+        return Issue.objects.create(**validated_data)

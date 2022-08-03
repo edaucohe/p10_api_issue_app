@@ -1,4 +1,6 @@
 # from django.shortcuts import render
+from typing import Optional
+
 from rest_framework import status
 # from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
@@ -8,6 +10,8 @@ from rest_framework.viewsets import ModelViewSet
 from projects.models import Project
 
 from projects.serializers import ProjectSerializer
+from users.models import Contributor
+from projects import service
 
 
 class ProjectViewSet(ModelViewSet):
@@ -37,19 +41,31 @@ class ProjectViewSet(ModelViewSet):
             return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def retrieve(self, request, pk=None):
-        instance = self.get_object()
-        return Response(self.serializer_class(instance).data, status=status.HTTP_200_OK)
+        user = request.user
+        project = self.get_object()
+
+        is_user_authorized = service.can_user_access_project(project, user)
+        if is_user_authorized:
+            response = Response(self.serializer_class(project).data, status=status.HTTP_200_OK)
+        else:
+            response = Response({'message': 'You are not a contributor'}, status=status.HTTP_403_FORBIDDEN)
+        return response
 
     def update(self, request, pk=None, *args, **kwargs):
         user = request.user
-        instance = self.get_object()
+        project: Project = self.get_object()
+        is_user_authorized = can_user_access_project(project, user, role=Contributor.Role.Author)
+
+        if not is_user_authorized:
+            return Response({'message': 'You must be the author to update'}, status=status.HTTP_403_FORBIDDEN)
+
         data = {
             "title": request.POST.get('title', None),
             "description": request.POST.get('description', None),
             "type": request.POST.get('type', None),
             }
         serializer = self.serializer_class(
-            instance=instance,
+            instance=project,
             data=data,
             context={'author': user},
             partial=True

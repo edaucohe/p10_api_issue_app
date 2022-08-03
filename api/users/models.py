@@ -10,11 +10,10 @@ class User(AbstractUser):
 
 
 class Contributor(models.Model):
-    TYPE_OF_ROLE = [
-        ("AUTHOR", "Author"),
-        ("CONTRIBUTOR", "Contributor")
-    ]
+    class Role(models.TextChoices):
+        Author = ("AUTHOR", "Author")
+        Contributor = ("CONTRIBUTOR", "Contributor")
 
     user = models.ForeignKey(to=settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     project = models.ForeignKey(to=Project, on_delete=models.CASCADE)
-    role = models.CharField(max_length=20, choices=TYPE_OF_ROLE, verbose_name='Type of role')
+    role = models.CharField(max_length=20, choices=Role, verbose_name='Type of role')

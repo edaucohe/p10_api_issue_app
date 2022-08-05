@@ -7,31 +7,28 @@ from projects.models import Project
 
 
 class Issue(models.Model):
-    TYPE_OF_TAG = [
-        ("BUG", "Bug"),
-        ("ENHANCEMENT", "Enhancement"),
-        ("TASK", "Task")
-    ]
+    class Tag(models.TextChoices):
+        BUG = ("BUG", "Bug")
+        ENHANCEMENT = ("ENHANCEMENT", "Enhancement")
+        TASK = ("TASK", "Task")
 
-    TYPE_OF_PRIORITY = [
-        ("LOW", "Low"),
-        ("MEDIUM", "Medium"),
-        ("HIGH", "High")
-    ]
+    class Priority(models.TextChoices):
+        LOW = ("LOW", "Low")
+        Medium = ("MEDIUM", "Medium")
+        HIGH = ("HIGH", "High")
 
-    TYPE_OF_STATUS = [
-        ("TODO", "To do"),
-        ("IN_PROGRESS", "In progress"),
-        ("DONE", "Done")
-    ]
+    class Status(models.TextChoices):
+        TODO = ("TODO", "To do")
+        IN_PROGRESS = ("IN_PROGRESS", "In progress")
+        DONE = ("DONE", "Done")
 
     title = models.CharField(max_length=120)
     description = models.TextField(max_length=2000)
     created_time = models.DateTimeField(auto_now_add=True)
 
-    tag = models.CharField(max_length=20, choices=TYPE_OF_TAG, verbose_name="type of tag")
-    priority = models.CharField(max_length=20, choices=TYPE_OF_PRIORITY, verbose_name="type of priority")
-    status = models.CharField(max_length=20, choices=TYPE_OF_STATUS, verbose_name="type of status")
+    tag = models.CharField(max_length=20, choices=Tag.choices, verbose_name="tag")
+    priority = models.CharField(max_length=20, choices=Priority.choices, verbose_name="priority")
+    status = models.CharField(max_length=20, choices=Status.choices, verbose_name="status")
 
     project = models.ForeignKey(to=Project, on_delete=models.CASCADE)
     author_user = models.ForeignKey(

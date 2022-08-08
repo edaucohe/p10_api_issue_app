@@ -1,12 +1,30 @@
-from rest_framework.serializers import ModelSerializer
+from rest_framework.serializers import ModelSerializer, CharField
 
 from issues.models import Issue
 
 
 class IssueSerializer(ModelSerializer):
+    tag = CharField(source='get_tag_display', read_only=True)
+    priority = CharField(source='get_priority_display', read_only=True)
+    status = CharField(source='get_status_display', read_only=True)
+    project = CharField(source='project.title', read_only=True)
+    author_user = CharField(source="author_user.username", read_only=True)
+    assignee_user = CharField(source="assignee_user.username", read_only=True)
+
     class Meta:
         model = Issue
-        fields = '__all__'
+        fields = [
+            'id',
+            'author_user',
+            'assignee_user',
+            'title',
+            'description',
+            'created_time',
+            'tag',
+            'priority',
+            'status',
+            'project'
+        ]
 
     def create(self, validated_data):
         return Issue.objects.create(**validated_data)

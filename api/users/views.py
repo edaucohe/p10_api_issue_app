@@ -1,20 +1,18 @@
 # from django.shortcuts import render
-# from django.contrib.auth.models import User
 from django.contrib.auth import get_user_model
-from django.db.models import Q
+from django.core.exceptions import ObjectDoesNotExist
+from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.generics import CreateAPIView
+from rest_framework.viewsets import ModelViewSet
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
-from rest_framework.views import APIView
-from rest_framework.viewsets import ModelViewSet, ViewSet
 
-from users.models import User
-# from users.serializers import UserSerializer, SignUpSerializer
+from users.serializers import UserSerializer, SignUpSerializer, ContributorSerializer
+from users.models import User, Contributor
 
-
-# Create your views here.
-from users.serializers import UserSerializer, SignUpSerializer
+from projects import service
+from projects.models import Project
 
 
 class UserViewSet(ModelViewSet):
@@ -42,24 +40,30 @@ class SignUpViewSet(CreateAPIView):
 
     def get_queryset(self):
         return get_user_model().objects.all()
-#
-#
-# class AccountView(APIView):
-#     serializer_class = SignUpSerializer
-#     permission_classes = (AllowAny,)
-#
-#     def post(self):
-#         # signu
-#         print('get in queryset')
-#         return get_user_model().objects.all()
-#
-#     @action(methods=['POST'], detail=False, permission_classes=[AllowAny], url_name='login')
-#     def login(self, truc):
-#         print(f'coucou {truc}')
-#         return Response(data={'result': 'ok'}, content_type='application/json')
-#
-#
-#
-# # POST /signup
-# # POST /login
-# # /users
+
+
+class ContributorViewSet(ModelViewSet):
+    serializer_class = ContributorSerializer
+    permission_classes = (IsAuthenticated,)
+    # authentication_classes = (TokenAuthentication,)
+    http_method_names = ['get', 'post', 'put', 'delete']
+
+    def get_queryset(self):
+        return Contributor.objects.all()
+
+    def list(self, request, project_pk=None, *args, **kwargs):
+        try:
+            user = self.request.user
+            project = Project.objects.filter(pk=project_pk).get()
+
+            user_role = Contributor.objects.filter(user=user, project=project_pk).get().role
+            is_user_authorized = service.can_user_access_project(project, user, role=user_role)
+            if not is_user_authorized:
+                return Response({'message': 'You are not a contributor'}, status=status.HTTP_403_FORBIDDEN)
+
+            contributor = list(Contributor.objects.filter(project=project_pk).order_by('id'))
+            return Response(self.serializer_class(contributor, many=True).data, status=status.HTTP_200_OK)
+
+        except ObjectDoesNotExist:
+            return Response({'message': 'You have not access to the project or projects does not exist'},
+                            status=status.HTTP_403_FORBIDDEN)

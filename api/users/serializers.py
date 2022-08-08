@@ -6,6 +6,8 @@ from django.contrib.auth import get_user_model
 # from users.models import User
 from rest_framework.validators import UniqueValidator
 
+from users.models import Contributor
+
 
 class UserSerializer(ModelSerializer):
     class Meta:
@@ -44,3 +46,14 @@ class SignUpSerializer(ModelSerializer):
         user.save()
 
         return user
+
+
+class ContributorSerializer(ModelSerializer):
+    user = CharField(source="user.username", read_only=True)
+    project = CharField(source='project.title', read_only=True)
+    role = CharField(source='get_role_display', read_only=True)
+
+    class Meta:
+        model = Contributor
+        fields = ['id', 'user', 'project', 'role']
+

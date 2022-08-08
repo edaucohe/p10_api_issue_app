@@ -19,7 +19,7 @@ from rest_framework_nested import routers
 from rest_framework.routers import DefaultRouter, SimpleRouter
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
-from users.views import SignUpViewSet, UserViewSet
+from users.views import SignUpViewSet, UserViewSet, ContributorViewSet
 from projects.views import ProjectViewSet
 from issues.views import IssueViewSet
 
@@ -33,8 +33,13 @@ router.register(r'projects', ProjectViewSet, basename='project')
 project_router = routers.NestedSimpleRouter(router, r'projects', lookup='project')
 project_router.register(r'issues', IssueViewSet, basename='issue')
 
-# router.register('issues', IssueViewSet, basename='issue')  /issues  /issues/:id   ||  /projects/:id/issues  /projects/:id/issues/:id
-# router.register('comments', CommentViewSet, basename='comments')  /comments  /comments/:id  ||
+# /projects/{id}/users/   ||   /projects/{id}/users/{id}
+project_router.register(r'users', ContributorViewSet, basename='contributor')
+
+# /projects/{id}/issues/{id}/comments/   ||   /projects/{id}/issues/{id}/comments/{id}/
+# TODO Add when CommentViewSet implemented
+# issue_router = routers.NestedSimpleRouter(router, r'issues', lookup='issues')
+# router.register(r'comments', CommentViewSet, basename='comments')
 
 
 urlpatterns = [
@@ -44,4 +49,7 @@ urlpatterns = [
     path('signup/', SignUpViewSet.as_view(), name='signup'),
     path(r'', include(router.urls)),
     path(r'', include(project_router.urls)),
+    # TODO Add when CommentViewSet implemented
+    # path(r'', include(issue_router.urls)),
 ]
+

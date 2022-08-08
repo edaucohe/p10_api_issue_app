@@ -67,3 +67,21 @@ class IssueViewSet(ModelViewSet):
             return Response(data=serializer.data, status=status.HTTP_201_CREATED)
         else:
             return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def retrieve(self, request, project_pk=None, *args, **kwargs):
+        try:
+            user = request.user
+            issue = self.get_object()
+            project_of_issue = issue.project
+            current_project = Project.objects.filter(pk=project_pk).get()
+
+            user_role = Contributor.objects.filter(user=user, project=project_of_issue).get().role
+            is_user_authorized = service.can_user_access_project(current_project, user, role=user_role)
+            if is_user_authorized:
+                return Response(self.serializer_class(issue).data, status=status.HTTP_200_OK)
+            else:
+                return Response({'message': 'You are not a contributor'}, status=status.HTTP_403_FORBIDDEN)
+
+        except ObjectDoesNotExist:
+            return Response({'message': 'You have not access to the project of this issue'},
+                            status=status.HTTP_403_FORBIDDEN)

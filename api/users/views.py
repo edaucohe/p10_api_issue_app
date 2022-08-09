@@ -93,3 +93,34 @@ class ContributorViewSet(ModelViewSet):
 
         except ObjectDoesNotExist:
             return Response({'message': 'Project does not exist'}, status=status.HTTP_403_FORBIDDEN)
+
+    def destroy(self, request, project_pk=None, *args, **kwargs):
+        try:
+            contributor: Contributor = self.get_object()
+            contributor_project = contributor.project
+            project = Project.objects.filter(pk=project_pk).get()
+
+            if not contributor_project == project:
+                return Response({'message': 'Contributor is not part of this project'},
+                                status=status.HTTP_406_NOT_ACCEPTABLE)
+
+            user = request.user
+            user_role = Contributor.objects.filter(user=user, project=project_pk).get().role
+            is_user_authorized = service.can_user_access_project(project, user, role=user_role)
+            if not is_user_authorized:
+                return Response({'message': 'You are not a contributor'}, status=status.HTTP_403_FORBIDDEN)
+
+            author = project.author_user
+            is_user_authorized_to_delete_issue = service.can_user_delete_contributor(author=author, user=user)
+            if not is_user_authorized_to_delete_issue:
+                return Response({'message': 'You must be the author to delete this contributor.'},
+                                status=status.HTTP_403_FORBIDDEN)
+
+            if author == user:
+                return Response({'message': 'You cannot delete yourself.'},
+                                status=status.HTTP_405_METHOD_NOT_ALLOWED)
+
+            return super(ContributorViewSet, self).destroy(request, project_pk, *args, **kwargs)
+
+        except ObjectDoesNotExist:
+            return Response({'message': 'You have not access to the project'}, status=status.HTTP_403_FORBIDDEN)

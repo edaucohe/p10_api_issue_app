@@ -25,4 +25,12 @@ def can_user_edit_issue(issue: Issue, user: User) -> bool:
         return False
 
 
+# contributor authorization
+def can_user_delete_contributor(author: User, user: User) -> bool:
+    if user == author:
+        return True
+    else:
+        return False
+
+
 # comment authorization

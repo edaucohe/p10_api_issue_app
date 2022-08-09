@@ -49,11 +49,13 @@ class SignUpSerializer(ModelSerializer):
 
 
 class ContributorSerializer(ModelSerializer):
-    user = CharField(source="user.username", read_only=True)
-    project = CharField(source='project.title', read_only=True)
-    role = CharField(source='get_role_display', read_only=True)
+    # user = CharField(source="user.username", read_only=True)
+    # project = CharField(source='project.title', read_only=True)
+    # role = CharField(source='get_role_display', read_only=True)
 
     class Meta:
         model = Contributor
         fields = ['id', 'user', 'project', 'role']
 
+    def create(self, validated_data):
+        return Contributor.objects.create(**validated_data)

@@ -67,3 +67,29 @@ class ContributorViewSet(ModelViewSet):
         except ObjectDoesNotExist:
             return Response({'message': 'You have not access to the project or projects does not exist'},
                             status=status.HTTP_403_FORBIDDEN)
+
+    def create(self, request, project_pk=None, *args, **kwargs):
+        try:
+            current_user = request.user
+            project = Project.objects.filter(pk=project_pk).get()
+
+            if not current_user == project.author_user:
+                return Response({'message': 'You are not author of this project'}, status=status.HTTP_403_FORBIDDEN)
+
+            username_of_contributor = request.POST.get('user', None)
+            contributor_pk = User.objects.filter(username=username_of_contributor).get().pk
+            data = {
+                "user": contributor_pk,
+                "project": int(project_pk),
+                "role": request.POST.get('role', None)
+                }
+
+            serializer = self.serializer_class(data=data, context={'author': current_user})
+            if serializer.is_valid():
+                serializer.save()
+                return Response(data=serializer.data, status=status.HTTP_201_CREATED)
+            else:
+                return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        except ObjectDoesNotExist:
+            return Response({'message': 'Project does not exist'}, status=status.HTTP_403_FORBIDDEN)

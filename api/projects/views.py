@@ -1,10 +1,8 @@
 # from django.shortcuts import render
 from django.core.exceptions import ObjectDoesNotExist
-from django.http import Http404
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
-from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 # from rest_framework.authentication import TokenAuthentication
 
@@ -23,7 +21,7 @@ class ProjectViewSet(ModelViewSet):
     def get_queryset(self):
         return Project.objects.all()
 
-    def list(self, request):
+    def list(self, request, *args, **kwargs):
         user = self.request.user
         projects = [contributor.project for contributor in Contributor.objects.filter(user=user)]
         projects = sorted(projects, key=lambda order_by: order_by.id)

@@ -4,8 +4,8 @@ from projects.models import Project
 
 
 class ProjectSerializer(ModelSerializer):
-    type = CharField(source='get_type_display', read_only=True)
-    author_user = CharField(source="author_user.username", read_only=True)
+    # type = CharField(source='get_type_display', read_only=True)
+    # author_user = CharField(source="author_user.username", read_only=True)
 
     class Meta:
         model = Project

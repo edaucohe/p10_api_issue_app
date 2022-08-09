@@ -56,7 +56,7 @@ class IssueViewSet(ModelViewSet):
             "tag": request.POST.get('tag', None),
             "priority": request.POST.get('priority', None),
             "status": request.POST.get('status', None),
-            "project": request.POST.get('project', None),
+            "project": project_pk,
             "author_user": user.pk,
             "assignee_user": assignee_user_pk
             }

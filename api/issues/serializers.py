@@ -1,15 +1,15 @@
-from rest_framework.serializers import ModelSerializer, CharField
+from rest_framework.serializers import ModelSerializer, CharField, IntegerField
 
 from issues.models import Issue
 
 
 class IssueSerializer(ModelSerializer):
-    tag = CharField(source='get_tag_display', read_only=True)
-    priority = CharField(source='get_priority_display', read_only=True)
-    status = CharField(source='get_status_display', read_only=True)
-    project = CharField(source='project.title', read_only=True)
-    author_user = CharField(source="author_user.username", read_only=True)
-    assignee_user = CharField(source="assignee_user.username", read_only=True)
+    # tag = CharField(source='get_tag_display')
+    # priority = CharField(source='get_priority_display')
+    # status = CharField(source='get_status_display')
+    # project = CharField(source='project.title')
+    # author_user = CharField(source="author_user.username")
+    # assignee_user = CharField(source="assignee_user.username")
 
     class Meta:
         model = Issue

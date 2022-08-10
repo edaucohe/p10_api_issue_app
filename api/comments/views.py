@@ -150,3 +150,33 @@ class CommentViewSet(ModelViewSet):
 
         except ObjectDoesNotExist:
             return Response({'message': 'Project or issue may not exist'}, status=status.HTTP_403_FORBIDDEN)
+
+    def destroy(self, request, project_pk=None, issues_pk=None, *args, **kwargs):
+        try:
+            user = request.user
+            comment: Comment = self.get_object()
+
+            current_project = Project.objects.filter(pk=project_pk).get()
+            issue = Issue.objects.filter(pk=issues_pk).get()
+            project_of_issue = issue.project
+            if not project_of_issue == current_project:
+                return Response({'message': 'Issue does not correspond to the project'},
+                                status=status.HTTP_406_NOT_ACCEPTABLE)
+
+            if not comment.issue == issue:
+                return Response({'message': 'Comment does not correspond to the issue'},
+                                status=status.HTTP_406_NOT_ACCEPTABLE)
+
+            is_user_authorized = service.can_user_access_project(current_project, user)
+            if not is_user_authorized:
+                return Response({'message': 'You are not a contributor'}, status=status.HTTP_403_FORBIDDEN)
+
+            is_user_authorized_to_delete_comment = service.can_user_edit_comment(comment=comment, user=user)
+            if not is_user_authorized_to_delete_comment:
+                return Response({'message': 'You must be the author to delete this comment.'},
+                                status=status.HTTP_403_FORBIDDEN)
+
+            return super(CommentViewSet, self).destroy(request, project_pk, *args, **kwargs)
+
+        except ObjectDoesNotExist:
+            return Response({'message': 'You have not access to the project'}, status=status.HTTP_403_FORBIDDEN)

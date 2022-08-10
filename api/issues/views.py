@@ -28,8 +28,8 @@ class IssueViewSet(ModelViewSet):
             user = self.request.user
             project = Project.objects.filter(pk=project_pk).get()
 
-            user_role = Contributor.objects.filter(user=user, project=project_pk).get().role
-            is_user_authorized = service.can_user_access_project(project, user, role=user_role)
+            # user_role = Contributor.objects.filter(user=user, project=project_pk).get().role
+            is_user_authorized = service.can_user_access_project(project, user)
             if not is_user_authorized:
                 return Response({'message': 'You are not a contributor'}, status=status.HTTP_403_FORBIDDEN)
 
@@ -43,6 +43,11 @@ class IssueViewSet(ModelViewSet):
     def create(self, request, project_pk=None, *args, **kwargs):
         user = request.user
         assignee_user_pk = user.pk
+
+        project = Project.objects.filter(pk=project_pk).get()
+        is_user_authorized = service.can_user_access_project(project, user)
+        if not is_user_authorized:
+            return Response({'message': 'You are not a contributor'}, status=status.HTTP_403_FORBIDDEN)
 
         assignee_user_name = request.POST.get('assignee_user', None)
         contributors = list(Contributor.objects.filter(project=project_pk))
@@ -75,8 +80,8 @@ class IssueViewSet(ModelViewSet):
             project_of_issue = issue.project
             current_project = Project.objects.filter(pk=project_pk).get()
 
-            user_role = Contributor.objects.filter(user=user, project=project_of_issue).get().role
-            is_user_authorized = service.can_user_access_project(current_project, user, role=user_role)
+            # user_role = Contributor.objects.filter(user=user, project=project_of_issue).get().role
+            is_user_authorized = service.can_user_access_project(current_project, user)
             if is_user_authorized:
                 return Response(self.serializer_class(issue).data, status=status.HTTP_200_OK)
             else:
@@ -93,8 +98,8 @@ class IssueViewSet(ModelViewSet):
             project_of_issue = issue.project
             current_project = Project.objects.filter(pk=project_pk).get()
 
-            user_role = Contributor.objects.filter(user=user, project=project_of_issue).get().role
-            is_user_authorized = service.can_user_access_project(current_project, user, role=user_role)
+            # user_role = Contributor.objects.filter(user=user, project=project_of_issue).get().role
+            is_user_authorized = service.can_user_access_project(current_project, user)
             if not is_user_authorized:
                 return Response({'message': 'You are not a contributor'}, status=status.HTTP_403_FORBIDDEN)
 
@@ -134,11 +139,11 @@ class IssueViewSet(ModelViewSet):
         try:
             user = request.user
             issue: Issue = self.get_object()
-            project_of_issue = issue.project
+            # project_of_issue = issue.project
             current_project = Project.objects.filter(pk=project_pk).get()
 
-            user_role = Contributor.objects.filter(user=user, project=project_of_issue).get().role
-            is_user_authorized = service.can_user_access_project(current_project, user, role=user_role)
+            # user_role = Contributor.objects.filter(user=user, project=project_of_issue).get().role
+            is_user_authorized = service.can_user_access_project(current_project, user)
             if not is_user_authorized:
                 return Response({'message': 'You are not a contributor'}, status=status.HTTP_403_FORBIDDEN)
 

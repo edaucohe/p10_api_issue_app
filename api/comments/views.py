@@ -79,3 +79,31 @@ class CommentViewSet(ModelViewSet):
 
         except ObjectDoesNotExist:
             return Response({'message': 'Project does not exist'}, status=status.HTTP_403_FORBIDDEN)
+
+    def retrieve(self, request, project_pk=None, issues_pk=None, *args, **kwargs):
+        try:
+            user = request.user
+            comment = self.get_object()
+
+            current_project = Project.objects.filter(pk=project_pk).get()
+            issue = Issue.objects.filter(pk=issues_pk).get()
+            project_of_issue = issue.project
+            if not project_of_issue == current_project:
+                return Response({'message': 'Issue does not correspond to the project'},
+                                status=status.HTTP_406_NOT_ACCEPTABLE)
+
+            if not comment.issue == issue:
+                return Response({'message': 'Comment does not correspond to the issue'},
+                                status=status.HTTP_406_NOT_ACCEPTABLE)
+
+            current_project = Project.objects.filter(pk=project_pk).get()
+            user_role = Contributor.objects.filter(user=user, project=project_of_issue).get().role
+            is_user_authorized = service.can_user_access_project(current_project, user, role=user_role)
+            if is_user_authorized:
+                return Response(self.serializer_class(comment).data, status=status.HTTP_200_OK)
+            else:
+                return Response({'message': 'You are not a contributor'}, status=status.HTTP_403_FORBIDDEN)
+
+        except ObjectDoesNotExist:
+            return Response({'message': 'Project or issue may not exist'},
+                            status=status.HTTP_403_FORBIDDEN)

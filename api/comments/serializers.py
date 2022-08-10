@@ -9,6 +9,10 @@ class CommentSerializer(ModelSerializer):
         fields = [
             'id',
             'author_user',
+            'issue',
             'description',
             'created_time'
         ]
+
+    def create(self, validated_data):
+        return Comment.objects.create(**validated_data)

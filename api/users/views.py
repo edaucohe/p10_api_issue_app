@@ -56,8 +56,8 @@ class ContributorViewSet(ModelViewSet):
             user = self.request.user
             project = Project.objects.filter(pk=project_pk).get()
 
-            user_role = Contributor.objects.filter(user=user, project=project_pk).get().role
-            is_user_authorized = service.can_user_access_project(project, user, role=user_role)
+            # user_role = Contributor.objects.filter(user=user, project=project_pk).get().role
+            is_user_authorized = service.can_user_access_project(project, user)
             if not is_user_authorized:
                 return Response({'message': 'You are not a contributor'}, status=status.HTTP_403_FORBIDDEN)
 
@@ -105,8 +105,8 @@ class ContributorViewSet(ModelViewSet):
                                 status=status.HTTP_406_NOT_ACCEPTABLE)
 
             user = request.user
-            user_role = Contributor.objects.filter(user=user, project=project_pk).get().role
-            is_user_authorized = service.can_user_access_project(project, user, role=user_role)
+            # user_role = Contributor.objects.filter(user=user, project=project_pk).get().role
+            is_user_authorized = service.can_user_access_project(project, user)
             if not is_user_authorized:
                 return Response({'message': 'You are not a contributor'}, status=status.HTTP_403_FORBIDDEN)
 
@@ -124,3 +124,48 @@ class ContributorViewSet(ModelViewSet):
 
         except ObjectDoesNotExist:
             return Response({'message': 'You have not access to the project'}, status=status.HTTP_403_FORBIDDEN)
+
+
+
+# user = request.user
+# user_role = Contributor.objects.filter(user=user, project=project_pk).get().role
+# is_user_authorized = service.can_user_access_project(project, user, role=user_role)
+# is_user_author = project.author_user == user
+# if not is_user_authorized:
+#     return Response({'message': 'You are not a contributor'}, status=status.HTTP_403_FORBIDDEN)
+# if not is_user_author:
+#     return Response({'message': 'You must be the author to delete this contributor.'}, status=status.HTTP_403_FORBIDDEN)
+#
+#
+# user = request.user
+# user_role = Contributor.objects.filter(user=user, project=project_pk).get().role
+# is_user_authorized = service.can_user_access_project(project, user, role=user_role)
+# if not is_user_authorized:
+#     return Response({'message': 'You are not a contributor'}, status=status.HTTP_403_FORBIDDEN)
+# author = project.author_user
+# is_user_authorized_to_delete_issue = service.can_user_delete_contributor(author=author, user=user)
+# if not is_user_authorized_to_delete_issue:
+#     return Response({'message': 'You must be the author to delete this contributor.'},
+#                     status=status.HTTP_403_FORBIDDEN)
+
+
+
+# user = request.user
+        #
+        # assignee_user_name = request.POST.get('assignee_user', None)
+        # contributors = list(Contributor.objects.filter(project=project_pk))
+        # for assignee_user in contributors:
+        #     if assignee_user_name == assignee_user.user.username:
+        #         assignee_user_pk = assignee_user.user_id
+        #
+        # data = {
+        #     "description": request.POST.get('description', None),
+        #     "author_user": user.pk
+        #     }
+        #
+        # serializer = self.serializer_class(data=data, context={'author': user})
+        # if serializer.is_valid():
+        #     serializer.save()
+        #     return Response(data=serializer.data, status=status.HTTP_201_CREATED)
+        # else:
+        #     return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)

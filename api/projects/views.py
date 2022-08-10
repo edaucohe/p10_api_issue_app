@@ -29,6 +29,7 @@ class ProjectViewSet(ModelViewSet):
 
     def create(self, request, *args, **kwargs):
         user = request.user
+
         data = {
             "title": request.POST.get('title', None),
             "description": request.POST.get('description', None),
@@ -47,8 +48,8 @@ class ProjectViewSet(ModelViewSet):
             user = request.user
             project = self.get_object()
 
-            user_role = Contributor.objects.filter(user=user, project=project).get().role
-            is_user_authorized = service.can_user_access_project(project, user, role=user_role)
+            # user_role = Contributor.objects.filter(user=user, project=project).get().role
+            is_user_authorized = service.can_user_access_project(project, user)
             if is_user_authorized:
                 return Response(self.serializer_class(project).data, status=status.HTTP_200_OK)
             else:
@@ -92,8 +93,8 @@ class ProjectViewSet(ModelViewSet):
             user = request.user
             project: Project = self.get_object()
 
-            user_role = Contributor.objects.filter(user=user, project=project).get().role
-            is_user_authorized = service.can_user_edit_project(project, user, role=user_role)
+            # user_role = Contributor.objects.filter(user=user, project=project).get().role
+            is_user_authorized = service.can_user_edit_project(project, user)
 
             if not is_user_authorized:
                 return Response({'message': 'You must be the author to delete.'}, status=status.HTTP_403_FORBIDDEN)

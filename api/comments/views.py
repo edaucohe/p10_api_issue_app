@@ -36,8 +36,8 @@ class CommentViewSet(ModelViewSet):
                 return Response({'message': 'Issue does not correspond to the project'},
                                 status=status.HTTP_406_NOT_ACCEPTABLE)
 
-            user_role = Contributor.objects.filter(user=user, project=project).get().role
-            is_user_authorized = service.can_user_access_project(project, user, role=user_role)
+            # user_role = Contributor.objects.filter(user=user, project=project).get().role
+            is_user_authorized = service.can_user_access_project(project, user)
             if not is_user_authorized:
                 return Response({'message': 'You are not a contributor'}, status=status.HTTP_403_FORBIDDEN)
 
@@ -58,8 +58,8 @@ class CommentViewSet(ModelViewSet):
                 return Response({'message': 'Issue does not correspond to the project'},
                                 status=status.HTTP_406_NOT_ACCEPTABLE)
 
-            user_role = Contributor.objects.filter(user=user, project=project_pk).get().role
-            is_user_authorized = service.can_user_access_project(current_project, user, role=user_role)
+            # user_role = Contributor.objects.filter(user=user, project=project_pk).get().role
+            is_user_authorized = service.can_user_access_project(current_project, user)
             if not is_user_authorized:
                 return Response({'message': 'You are not a contributor'}, status=status.HTTP_403_FORBIDDEN)
 
@@ -67,7 +67,7 @@ class CommentViewSet(ModelViewSet):
             data = {
                 "description": request.POST.get('description', None),
                 "author_user": user.pk,
-                "issue": issue_id,
+                "issue": issue_id
                 }
 
             serializer = self.serializer_class(data=data, context={'author': user})
@@ -97,8 +97,8 @@ class CommentViewSet(ModelViewSet):
                                 status=status.HTTP_406_NOT_ACCEPTABLE)
 
             current_project = Project.objects.filter(pk=project_pk).get()
-            user_role = Contributor.objects.filter(user=user, project=project_of_issue).get().role
-            is_user_authorized = service.can_user_access_project(current_project, user, role=user_role)
+            # user_role = Contributor.objects.filter(user=user, project=project_of_issue).get().role
+            is_user_authorized = service.can_user_access_project(current_project, user)
             if is_user_authorized:
                 return Response(self.serializer_class(comment).data, status=status.HTTP_200_OK)
             else:
@@ -107,3 +107,46 @@ class CommentViewSet(ModelViewSet):
         except ObjectDoesNotExist:
             return Response({'message': 'Project or issue may not exist'},
                             status=status.HTTP_403_FORBIDDEN)
+
+    def update(self, request, project_pk=None, issues_pk=None, *args, **kwargs):
+        try:
+            user = request.user
+            comment = self.get_object()
+
+            current_project = Project.objects.filter(pk=project_pk).get()
+            issue = Issue.objects.filter(pk=issues_pk).get()
+            project_of_issue = issue.project
+            if not project_of_issue == current_project:
+                return Response({'message': 'Issue does not correspond to the project'},
+                                status=status.HTTP_406_NOT_ACCEPTABLE)
+
+            if not comment.issue == issue:
+                return Response({'message': 'Comment does not correspond to the issue'},
+                                status=status.HTTP_406_NOT_ACCEPTABLE)
+
+            is_user_authorized_to_edit_issue = service.can_user_edit_comment(comment=comment, user=user)
+            if not is_user_authorized_to_edit_issue:
+                return Response({'message': 'You must be the author to update this comment.'},
+                                status=status.HTTP_403_FORBIDDEN)
+
+            issue_id = issue.pk
+            data = {
+                "description": request.POST.get('description', None),
+                "author_user": user.pk,
+                "issue": issue_id
+            }
+
+            serializer = self.serializer_class(
+                instance=comment,
+                data=data,
+                context={'author': user},
+                partial=True
+            )
+            if serializer.is_valid():
+                serializer.save()
+                return Response(data=serializer.data, status=status.HTTP_201_CREATED)
+            else:
+                return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        except ObjectDoesNotExist:
+            return Response({'message': 'Project or issue may not exist'}, status=status.HTTP_403_FORBIDDEN)

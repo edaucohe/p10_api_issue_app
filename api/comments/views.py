@@ -1,5 +1,4 @@
 from django.core.exceptions import ObjectDoesNotExist
-from django.shortcuts import render
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -10,7 +9,6 @@ from comments.models import Comment
 
 from issues.models import Issue
 from projects.models import Project
-from users.models import Contributor
 
 from projects import service
 
@@ -18,7 +16,6 @@ from projects import service
 class CommentViewSet(ModelViewSet):
     serializer_class = CommentSerializer
     permission_classes = (IsAuthenticated,)
-    # authentication_classes = (TokenAuthentication,)
     http_method_names = ['get', 'post', 'put', 'delete']
 
     def get_queryset(self):
@@ -36,7 +33,6 @@ class CommentViewSet(ModelViewSet):
                 return Response({'message': 'Issue does not correspond to the project'},
                                 status=status.HTTP_406_NOT_ACCEPTABLE)
 
-            # user_role = Contributor.objects.filter(user=user, project=project).get().role
             is_user_authorized = service.can_user_access_project(project, user)
             if not is_user_authorized:
                 return Response({'message': 'You are not a contributor'}, status=status.HTTP_403_FORBIDDEN)
@@ -45,8 +41,8 @@ class CommentViewSet(ModelViewSet):
             return Response(self.serializer_class(comments, many=True).data, status=status.HTTP_200_OK)
 
         except ObjectDoesNotExist:
-            return Response({'message': 'You have not access to the project or issue does not exist'},
-                            status=status.HTTP_403_FORBIDDEN)
+            return Response({'message': 'Project or issue do not exist'},
+                            status=status.HTTP_404_NOT_FOUND)
 
     def create(self, request, project_pk=None, issues_pk=None, *args, **kwargs):
         try:
@@ -58,7 +54,6 @@ class CommentViewSet(ModelViewSet):
                 return Response({'message': 'Issue does not correspond to the project'},
                                 status=status.HTTP_406_NOT_ACCEPTABLE)
 
-            # user_role = Contributor.objects.filter(user=user, project=project_pk).get().role
             is_user_authorized = service.can_user_access_project(current_project, user)
             if not is_user_authorized:
                 return Response({'message': 'You are not a contributor'}, status=status.HTTP_403_FORBIDDEN)
@@ -78,7 +73,7 @@ class CommentViewSet(ModelViewSet):
                 return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
         except ObjectDoesNotExist:
-            return Response({'message': 'Project does not exist'}, status=status.HTTP_403_FORBIDDEN)
+            return Response({'message': 'Project or issue do not exist'}, status=status.HTTP_404_NOT_FOUND)
 
     def retrieve(self, request, project_pk=None, issues_pk=None, *args, **kwargs):
         try:
@@ -97,7 +92,6 @@ class CommentViewSet(ModelViewSet):
                                 status=status.HTTP_406_NOT_ACCEPTABLE)
 
             current_project = Project.objects.filter(pk=project_pk).get()
-            # user_role = Contributor.objects.filter(user=user, project=project_of_issue).get().role
             is_user_authorized = service.can_user_access_project(current_project, user)
             if is_user_authorized:
                 return Response(self.serializer_class(comment).data, status=status.HTTP_200_OK)
@@ -106,7 +100,7 @@ class CommentViewSet(ModelViewSet):
 
         except ObjectDoesNotExist:
             return Response({'message': 'Project or issue may not exist'},
-                            status=status.HTTP_403_FORBIDDEN)
+                            status=status.HTTP_404_NOT_FOUND)
 
     def update(self, request, project_pk=None, issues_pk=None, *args, **kwargs):
         try:
@@ -149,7 +143,7 @@ class CommentViewSet(ModelViewSet):
                 return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
         except ObjectDoesNotExist:
-            return Response({'message': 'Project or issue may not exist'}, status=status.HTTP_403_FORBIDDEN)
+            return Response({'message': 'Project or issue may not exist'}, status=status.HTTP_404_NOT_FOUND)
 
     def destroy(self, request, project_pk=None, issues_pk=None, *args, **kwargs):
         try:
@@ -179,4 +173,4 @@ class CommentViewSet(ModelViewSet):
             return super(CommentViewSet, self).destroy(request, project_pk, *args, **kwargs)
 
         except ObjectDoesNotExist:
-            return Response({'message': 'You have not access to the project'}, status=status.HTTP_403_FORBIDDEN)
+            return Response({'message': 'Project or issue do not exist'}, status=status.HTTP_404_NOT_FOUND)

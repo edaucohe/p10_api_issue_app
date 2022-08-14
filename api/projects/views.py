@@ -1,10 +1,8 @@
-# from django.shortcuts import render
 from django.core.exceptions import ObjectDoesNotExist
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.permissions import IsAuthenticated
-# from rest_framework.authentication import TokenAuthentication
 
 from projects import service
 from projects.serializers import ProjectSerializer
@@ -15,7 +13,6 @@ from users.models import Contributor
 class ProjectViewSet(ModelViewSet):
     serializer_class = ProjectSerializer
     permission_classes = (IsAuthenticated,)
-    # authentication_classes = (TokenAuthentication,)
     http_method_names = ['get', 'post', 'put', 'delete']
 
     def get_queryset(self):
@@ -48,7 +45,6 @@ class ProjectViewSet(ModelViewSet):
             user = request.user
             project = self.get_object()
 
-            # user_role = Contributor.objects.filter(user=user, project=project).get().role
             is_user_authorized = service.can_user_access_project(project, user)
             if is_user_authorized:
                 return Response(self.serializer_class(project).data, status=status.HTTP_200_OK)
@@ -56,12 +52,17 @@ class ProjectViewSet(ModelViewSet):
                 return Response({'message': 'You are not a contributor'}, status=status.HTTP_403_FORBIDDEN)
 
         except ObjectDoesNotExist:
-            return Response({'message': 'You have not access to the project'}, status=status.HTTP_403_FORBIDDEN)
+            return Response({'message': 'Project does not exist'}, status=status.HTTP_404_NOT_FOUND)
 
     def update(self, request, pk=None, *args, **kwargs):
         try:
             user = request.user
             project: Project = self.get_object()
+
+            is_user_authorized = service.can_user_access_project(project, user)
+            if not is_user_authorized:
+                return Response({'message': 'You are not a contributor of this project'},
+                                status=status.HTTP_403_FORBIDDEN)
 
             user_role = Contributor.objects.filter(user=user, project=project).get().role
             is_user_authorized = service.can_user_edit_project(project, user, role=user_role)
@@ -86,15 +87,15 @@ class ProjectViewSet(ModelViewSet):
                 return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
         except ObjectDoesNotExist:
-            return Response({'message': 'You have not access to the project'}, status=status.HTTP_403_FORBIDDEN)
+            return Response({'message': 'Project does not exist'}, status=status.HTTP_404_NOT_FOUND)
 
     def destroy(self, request, pk=None, *args, **kwargs):
         try:
             user = request.user
             project: Project = self.get_object()
 
-            # user_role = Contributor.objects.filter(user=user, project=project).get().role
-            is_user_authorized = service.can_user_edit_project(project, user)
+            user_role = Contributor.objects.filter(user=user, project=project).get().role
+            is_user_authorized = service.can_user_edit_project(project, user, role=user_role)
 
             if not is_user_authorized:
                 return Response({'message': 'You must be the author to delete.'}, status=status.HTTP_403_FORBIDDEN)
@@ -102,4 +103,4 @@ class ProjectViewSet(ModelViewSet):
             return super(ProjectViewSet, self).destroy(request, pk, *args, **kwargs)
 
         except ObjectDoesNotExist:
-            return Response({'message': 'You have not access to the project'}, status=status.HTTP_403_FORBIDDEN)
+            return Response({'message': 'Project does  not exist'}, status=status.HTTP_404_NOT_FOUND)

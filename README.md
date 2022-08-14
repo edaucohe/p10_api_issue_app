@@ -1,10 +1,22 @@
 # Project 10 - API issues app
 
 ## Contents
+- [Keywords](#keywords)
 - [Description](#description)
 - [Installation](#installation)
 - [Use](#use)
 - [Helpful links](#links)
+
+## Keywords <a class="anchor" id="keywords"></a>
+- Issue tracking system
+- Author/Contributor
+- Project
+- Issue
+- Comment
+
+
+- Application Programming Interface (API) 
+- Django Rest Framework (DRF)
 
 ## Description <a class="anchor" id="description"></a>
 
@@ -14,7 +26,7 @@ course leading to a qualification.
 This project aims to implement an API for an "Issue tracking system" using Django REST Framework.
 
 The app allows users to create, read, update and delete (CRUD) projects/issues/comments 
-and to add other users into a project as collaborators.
+and to add other users into a project as contributors.
 
 The main functionalities of API are:
 - Authenticate **users** during sign up and login.
@@ -71,12 +83,8 @@ To start API, go into the folder `../p10_api_issues_app/api/` and launch:
 python manage.py runserver  
 ```
 
-When local server is launched, go to Postman and import 
-`../documentation/P10 API.postman_collection.json/` json file.
-
 Concerning endpoints, they are formed by the root `http://127.0.0.1:8000/` followed by an URI. 
-You can find here below the URI list (you can also find it in 
-`../documentation/Softdesk - Conception de la mise en œuvre.docx/`):
+You can find here below the URI list:
 
 | #   |    Functionality     | HTTP Request |                    URI                    |
 |-----|:--------------------:|:------------:|:-----------------------------------------:|
@@ -100,6 +108,9 @@ You can find here below the URI list (you can also find it in
 | 18  |   Delete a comment   |    DELETE    | /projects/{id}/issues/{id}/comment/{id}/  |
 | 19  |  Display a comment   |     GET      | /projects/{id}/issues/{id}/comment/{id}/  |
 
+So, when local server is launched, you can go to your Postman account and test endpoints 
+according to API documentation (See [Helpful links](#links)).
+
 ## Helpful links <a class="anchor" id="links"></a>
 
 DRF installation and settings:
@@ -116,3 +127,6 @@ https://ilovedjango.com/django/rest-api-framework/views/viewset/
 
 DRF Nested routers installation, explanation and exemples: 
 https://github.com/alanjds/drf-nested-routers
+
+API documentation: 
+https://documenter.getpostman.com/view/22241212/VUjSGPdB
